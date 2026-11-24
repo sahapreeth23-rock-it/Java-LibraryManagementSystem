@@ -3,16 +3,20 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
+import service.LibraryService;
 
 public class MainFrame extends JFrame {
-public void showDashboard() {
-    cardLayout.show(mainPanel, "DASHBOARD");
-}
-public void showPage(String page) {
-    cardLayout.show(mainPanel, page);
-}
+
     CardLayout cardLayout;
     JPanel mainPanel;
+
+    public void showDashboard() {
+        cardLayout.show(mainPanel, "DASHBOARD");
+    }
+
+    public void showPage(String page) {
+        cardLayout.show(mainPanel, page);
+    }
 
     public MainFrame() {
 
@@ -24,10 +28,16 @@ public void showPage(String page) {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
+        // Shared service for Books and Members
+        LibraryService libraryService = new LibraryService();
+
         mainPanel.add(new HomePanel(), "HOME");
         mainPanel.add(new DashboardPanel(), "DASHBOARD");
-        mainPanel.add(createPage("Book Management"), "BOOKS");
-        mainPanel.add(createPage("Member Management"), "MEMBERS");
+
+        // Actual management panels
+        mainPanel.add(new BookPanel(libraryService), "BOOKS");
+        mainPanel.add(new MemberPanel(libraryService), "MEMBERS");
+
         mainPanel.add(createPage("Issue / Return"), "ISSUE");
 
         JPanel sidebar = new JPanel(new GridLayout(7, 1, 5, 10));
@@ -56,27 +66,27 @@ public void showPage(String page) {
 
     JPanel createPage(String title) {
 
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setBackground(Color.WHITE);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
 
-    JLabel heading = new JLabel(title);
-    heading.setFont(new Font("Arial", Font.BOLD, 28));
-    heading.setBorder(
-        BorderFactory.createEmptyBorder(30, 30, 20, 30)
-    );
+        JLabel heading = new JLabel(title);
+        heading.setFont(new Font("Arial", Font.BOLD, 28));
+        heading.setBorder(
+            BorderFactory.createEmptyBorder(30, 30, 20, 30)
+        );
 
-    JLabel message = new JLabel(
-        "This section will be available soon.",
-        JLabel.CENTER
-    );
+        JLabel message = new JLabel(
+            "This section will be available soon.",
+            JLabel.CENTER
+        );
 
-    message.setFont(new Font("Arial", Font.PLAIN, 18));
+        message.setFont(new Font("Arial", Font.PLAIN, 18));
 
-    panel.add(heading, BorderLayout.NORTH);
-    panel.add(message, BorderLayout.CENTER);
+        panel.add(heading, BorderLayout.NORTH);
+        panel.add(message, BorderLayout.CENTER);
 
-    return panel;
-}
+        return panel;
+    }
 
     void addButton(JPanel sidebar, String name, String page) {
 
