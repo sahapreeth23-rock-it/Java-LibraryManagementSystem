@@ -46,7 +46,8 @@ public class IssuePanel extends JPanel {
         // Issue Book Form
         JPanel issuePanel = new JPanel(new GridLayout(3, 2, 10, 10));
         issuePanel.setBorder(
-                BorderFactory.createTitledBorder("Issue a Book"));
+            BorderFactory.createTitledBorder("Issue a Book")
+        );
 
         txtBookId = new JTextField(15);
         txtMemberId = new JTextField(15);
@@ -65,7 +66,8 @@ public class IssuePanel extends JPanel {
         // Return Book Form
         JPanel returnPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         returnPanel.setBorder(
-                BorderFactory.createTitledBorder("Return a Book"));
+            BorderFactory.createTitledBorder("Return a Book")
+        );
 
         txtIssueId = new JTextField(15);
         JButton btnReturn = new JButton("Return Book");
@@ -78,6 +80,7 @@ public class IssuePanel extends JPanel {
 
         // Form Container
         JPanel formContainer = new JPanel(new GridLayout(1, 2, 15, 15));
+
         formContainer.add(issuePanel);
         formContainer.add(returnPanel);
 
@@ -87,13 +90,13 @@ public class IssuePanel extends JPanel {
 
         // Transaction Table
         String[] columns = {
-                "Issue ID",
-                "Book ID",
-                "Member ID",
-                "Issue Date",
-                "Due Date",
-                "Return Date",
-                "Status"
+            "Issue ID",
+            "Book ID",
+            "Member ID",
+            "Issue Date",
+            "Due Date",
+            "Return Date",
+            "Status"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -109,8 +112,10 @@ public class IssuePanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(issueTable);
 
         JPanel tablePanel = new JPanel(new BorderLayout());
+
         tablePanel.setBorder(
-                BorderFactory.createTitledBorder("Transaction Records"));
+            BorderFactory.createTitledBorder("Transaction Records")
+        );
 
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -118,7 +123,6 @@ public class IssuePanel extends JPanel {
 
         // Button Actions
         btnIssue.addActionListener(e -> issueBook());
-
         btnReturn.addActionListener(e -> returnBook());
     }
 
@@ -131,29 +135,30 @@ public class IssuePanel extends JPanel {
             String memberId = txtMemberId.getText().trim();
 
             IssueRecord record =
-                    issueService.issueBook(bookId, memberId);
+                issueService.issueBook(bookId, memberId);
 
             refreshIssueTable();
+            updateDashboard();
 
             txtBookId.setText("");
             txtMemberId.setText("");
 
             JOptionPane.showMessageDialog(
-                    this,
-                    "Book issued successfully!\nIssue ID: "
-                            + record.getIssueId()
-                            + "\nDue Date: " + record.getDueDate(),
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
+                this,
+                "Book issued successfully!\nIssue ID: "
+                    + record.getIssueId()
+                    + "\nDue Date: " + record.getDueDate(),
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE
             );
 
         } catch (IllegalArgumentException ex) {
 
             JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Issue Error",
-                    JOptionPane.ERROR_MESSAGE
+                this,
+                ex.getMessage(),
+                "Issue Error",
+                JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -166,26 +171,27 @@ public class IssuePanel extends JPanel {
             String issueId = txtIssueId.getText().trim();
 
             IssueRecord record =
-                    issueService.returnBook(issueId);
+                issueService.returnBook(issueId);
 
             refreshIssueTable();
+            updateDashboard();
 
             txtIssueId.setText("");
 
             JOptionPane.showMessageDialog(
-                    this,
-                    "Book returned successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
+                this,
+                "Book returned successfully!",
+                "Success",
+                JOptionPane.INFORMATION_MESSAGE
             );
 
         } catch (IllegalArgumentException ex) {
 
             JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Return Error",
-                    JOptionPane.ERROR_MESSAGE
+                this,
+                ex.getMessage(),
+                "Return Error",
+                JOptionPane.ERROR_MESSAGE
             );
         }
     }
@@ -194,7 +200,7 @@ public class IssuePanel extends JPanel {
     public void refreshIssueTable() {
 
         List<IssueRecord> records =
-                issueService.getAllIssueRecords();
+            issueService.getAllIssueRecords();
 
         tableModel.setRowCount(0);
 
@@ -202,20 +208,31 @@ public class IssuePanel extends JPanel {
 
             tableModel.addRow(new Object[]{
 
-                    record.getIssueId(),
-                    record.getBookId(),
-                    record.getMemberId(),
-                    record.getIssueDate(),
-                    record.getDueDate(),
+                record.getIssueId(),
+                record.getBookId(),
+                record.getMemberId(),
+                record.getIssueDate(),
+                record.getDueDate(),
 
-                    record.getReturnDate() == null
-                            ? "Not Returned"
-                            : record.getReturnDate(),
+                record.getReturnDate() == null
+                    ? "Not Returned"
+                    : record.getReturnDate(),
 
-                    record.isReturned()
-                            ? "Returned"
-                            : "Issued"
+                record.isReturned()
+                    ? "Returned"
+                    : "Issued"
             });
+        }
+    }
+
+    // Update dashboard statistics
+    private void updateDashboard() {
+
+        MainFrame frame =
+            (MainFrame) SwingUtilities.getWindowAncestor(this);
+
+        if (frame != null) {
+            frame.showDashboardStatistics();
         }
     }
 }

@@ -19,19 +19,31 @@ public class MainFrame extends JFrame {
     private IssueService issueService;
     private DashboardPanel dashboardPanel;
 
+    // Open dashboard and refresh statistics
     public void showDashboard() {
 
-        dashboardPanel.updateStatistics(
-                libraryService.getAllBooks().size(),
-                libraryService.getAllMembers().size(),
-                issueService.getIssuedCount()
-        );
+        showDashboardStatistics();
 
         cardLayout.show(mainPanel, "DASHBOARD");
     }
 
+    // Refresh dashboard statistics
+    public void showDashboardStatistics() {
+
+        dashboardPanel.updateStatistics(
+            libraryService.getAllBooks().size(),
+            libraryService.getAllMembers().size(),
+            issueService.getIssuedCount()
+        );
+    }
+
     public void showPage(String page) {
-        cardLayout.show(mainPanel, page);
+
+        if (page.equals("DASHBOARD")) {
+            showDashboard();
+        } else {
+            cardLayout.show(mainPanel, page);
+        }
     }
 
     public MainFrame() {
@@ -44,33 +56,52 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
+        // Create shared services
         libraryService = new LibraryService();
         issueService = new IssueService(libraryService);
+
+        // Load saved data
         try {
+
             FileHandler.loadAll(libraryService, issueService);
+
         } catch (IOException e) {
+
             JOptionPane.showMessageDialog(
-                    this,
-                    "Error loading saved data: " + e.getMessage()
+                this,
+                "Error loading saved data: " + e.getMessage()
             );
         }
 
+        // Add application pages
         mainPanel.add(new HomePanel(), "HOME");
+
         dashboardPanel = new DashboardPanel();
         mainPanel.add(dashboardPanel, "DASHBOARD");
-        // Actual management panels
-        mainPanel.add(new BookPanel(libraryService), "BOOKS");
-        mainPanel.add(new MemberPanel(libraryService), "MEMBERS");
 
         mainPanel.add(
-                new IssuePanel(libraryService, issueService),
-                "ISSUE"
+            new BookPanel(libraryService),
+            "BOOKS"
         );
+
+        mainPanel.add(
+            new MemberPanel(libraryService),
+            "MEMBERS"
+        );
+
+        mainPanel.add(
+            new IssuePanel(libraryService, issueService),
+            "ISSUE"
+        );
+
+        // Sidebar
         JPanel sidebar = new JPanel(new GridLayout(7, 1, 5, 10));
+
         sidebar.setPreferredSize(new Dimension(200, 0));
         sidebar.setBackground(new Color(25, 45, 75));
 
         JLabel heading = new JLabel("  LIBRARY SYSTEM");
+
         heading.setForeground(Color.WHITE);
         heading.setFont(new Font("Arial", Font.BOLD, 17));
 
@@ -87,16 +118,24 @@ public class MainFrame extends JFrame {
         add(sidebar, BorderLayout.WEST);
         add(mainPanel, BorderLayout.CENTER);
 
-        // Save all data when the application closes
+        // Save data when application closes
         addWindowListener(new WindowAdapter() {
+
             @Override
             public void windowClosing(WindowEvent e) {
+
                 try {
-                    FileHandler.saveAll(libraryService, issueService);
+
+                    FileHandler.saveAll(
+                        libraryService,
+                        issueService
+                    );
+
                 } catch (IOException ex) {
+
                     JOptionPane.showMessageDialog(
-                            MainFrame.this,
-                            "Error saving data: " + ex.getMessage()
+                        MainFrame.this,
+                        "Error saving data: " + ex.getMessage()
                     );
                 }
             }
@@ -111,7 +150,9 @@ public class MainFrame extends JFrame {
         panel.setBackground(Color.WHITE);
 
         JLabel heading = new JLabel(title);
+
         heading.setFont(new Font("Arial", Font.BOLD, 28));
+
         heading.setBorder(
             BorderFactory.createEmptyBorder(30, 30, 20, 30)
         );
@@ -132,17 +173,12 @@ public class MainFrame extends JFrame {
     void addButton(JPanel sidebar, String name, String page) {
 
         JButton button = new JButton(name);
+
         button.setForeground(Color.WHITE);
         button.setBackground(new Color(45, 75, 115));
         button.setFocusPainted(false);
 
-        button.addActionListener(e -> {
-            if (page.equals("DASHBOARD")) {
-                showDashboard();
-            } else {
-                cardLayout.show(mainPanel, page);
-            }
-        });
+        button.addActionListener(e -> showPage(page));
 
         sidebar.add(button);
     }
