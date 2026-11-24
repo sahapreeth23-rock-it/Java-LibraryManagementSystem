@@ -6,7 +6,7 @@ public class Book {
     private String category; 
     private int totalCopies; 
     private int availableCopies; 
-    Constructor public Book() { 
+    public Book() { 
         this.bookId = ""; 
         this.title = ""; 
         this.author = ""; 

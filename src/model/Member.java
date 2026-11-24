@@ -18,13 +18,14 @@ public class Member {
             this.email = email; 
             this.phone = phone; 
             this.membershipDate = java.time.LocalDate.now().toString();  
-            public Member(String memberId, String name, String email, String phone, String membershipDate) { 
+        }
+         public Member(String memberId, String name, String email, String phone, String membershipDate) { 
                 this.memberId = memberId; 
                 this.name = name; 
                 this.email = email; 
                 this.phone = phone; 
                 this.membershipDate = membershipDate; 
-                } 
+        } 
                 public String getMemberId() { return memberId; } 
                 public void setMemberId(String memberId) { this.memberId = memberId; } 
                 public String getName() { return name; } 
