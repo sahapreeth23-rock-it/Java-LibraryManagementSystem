@@ -4,13 +4,29 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import service.LibraryService;
+import service.IssueService;
+import utility.FileHandler;
+import java.io.IOException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MainFrame extends JFrame {
 
     CardLayout cardLayout;
     JPanel mainPanel;
 
+    private LibraryService libraryService;
+    private IssueService issueService;
+    private DashboardPanel dashboardPanel;
+
     public void showDashboard() {
+
+        dashboardPanel.updateStatistics(
+                libraryService.getAllBooks().size(),
+                libraryService.getAllMembers().size(),
+                issueService.getIssuedCount()
+        );
+
         cardLayout.show(mainPanel, "DASHBOARD");
     }
 
@@ -28,18 +44,28 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Shared service for Books and Members
-        LibraryService libraryService = new LibraryService();
+        libraryService = new LibraryService();
+        issueService = new IssueService(libraryService);
+        try {
+            FileHandler.loadAll(libraryService, issueService);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error loading saved data: " + e.getMessage()
+            );
+        }
 
         mainPanel.add(new HomePanel(), "HOME");
-        mainPanel.add(new DashboardPanel(), "DASHBOARD");
-
+        dashboardPanel = new DashboardPanel();
+        mainPanel.add(dashboardPanel, "DASHBOARD");
         // Actual management panels
         mainPanel.add(new BookPanel(libraryService), "BOOKS");
         mainPanel.add(new MemberPanel(libraryService), "MEMBERS");
 
-        mainPanel.add(createPage("Issue / Return"), "ISSUE");
-
+        mainPanel.add(
+                new IssuePanel(libraryService, issueService),
+                "ISSUE"
+        );
         JPanel sidebar = new JPanel(new GridLayout(7, 1, 5, 10));
         sidebar.setPreferredSize(new Dimension(200, 0));
         sidebar.setBackground(new Color(25, 45, 75));
@@ -60,6 +86,21 @@ public class MainFrame extends JFrame {
 
         add(sidebar, BorderLayout.WEST);
         add(mainPanel, BorderLayout.CENTER);
+
+        // Save all data when the application closes
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    FileHandler.saveAll(libraryService, issueService);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            "Error saving data: " + ex.getMessage()
+                    );
+                }
+            }
+        });
 
         setVisible(true);
     }
@@ -95,9 +136,13 @@ public class MainFrame extends JFrame {
         button.setBackground(new Color(45, 75, 115));
         button.setFocusPainted(false);
 
-        button.addActionListener(e ->
-            cardLayout.show(mainPanel, page)
-        );
+        button.addActionListener(e -> {
+            if (page.equals("DASHBOARD")) {
+                showDashboard();
+            } else {
+                cardLayout.show(mainPanel, page);
+            }
+        });
 
         sidebar.add(button);
     }
